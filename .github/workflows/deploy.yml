@@ -1,0 +1,29 @@
+name: CI/CD - Validar y Desplegar Servicio SOA
+
+on:
+  push:
+    branches: [ main ] # Se ejecuta al hacer push a la rama principal
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código fuente del repositorio
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      # 2. Configurar el entorno de Node.js
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      # 3. Instalar las dependencias del proyecto
+      - name: Instalar dependencias
+        run: npm install
+
+      # 4. Si todo instala y compila bien, notificar a Render mediante el Webhook seguro
+      - name: Notificar a Render para publicar
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
