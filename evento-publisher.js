@@ -1,14 +1,18 @@
 const amqp = require("amqplib");
+const { randomUUID } = require("crypto");
 
 const QUEUE = "productos.consultados";
 
 async function publicarProductoConsultado(cantidadProductos) {
-  const connection = await amqp.connect("amqps://hcilcnzt:K1l7qK0vUiVjBbeUivDHQPfBrBW_THgV@capybara.lmq.cloudamqp.com/hcilcnzt");
+  const amqpUrl = process.env.AMQP_URL;
+  if (!amqpUrl) throw new Error("Falta configurar AMQP_URL");
+
+  const connection = await amqp.connect(amqpUrl);
   const channel = await connection.createChannel();
   await channel.assertQueue(QUEUE, { durable: false });
 
   const evento = {
-    eventoId: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+    eventoId: randomUUID(),
     tipo: "ProductoConsultado",
     fecha: new Date().toISOString(),
     origen: "soa-productos-service",
